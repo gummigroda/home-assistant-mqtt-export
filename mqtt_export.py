@@ -44,8 +44,15 @@ def setup(hass, config):
 
         PAYLOAD["states"] = hass.states.all()
 
-        payload = json.dumps(PAYLOAD, cls=JSONEncoder)
-        mqtt.publish(hass, pub_topic, payload)
+        """
+        Create topic from entity_id domain
+        ex. 
+            haexport/light/livingroom
+            haexport/sensor/livingroom
+        """
+        entid = event.data.get('entity_id').split('.')
+        topic = "%s/%s/%s" % (pub_topic, entid[0],entid[1])
+        mqtt.publish(hass, topic, state.state)
 
     hass.bus.listen(EVENT_STATE_CHANGED, mqtt_event_listener)
 
